@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Finanças</title>
+    <!-- Inclui o framework de CSS Tailwind para estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inclui a fonte Inter do Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        /* Estilos personalizados para o input de radio */
+        input[type="radio"].form-radio:checked {
+            border-color: transparent;
+            background-color: currentColor;
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3.2'/%3e%3c/svg%3e");
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <div class="container min-h-screen py-8">
+        <!-- Título principal e cabeçalho do aplicativo -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">Planilha de Finanças</h1>
+            <p class="text-lg text-gray-600">Seu painel de controle financeiro pessoal</p>
+        </header>
+
+        <!-- Seção principal do painel -->
+        <main class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Painel de resumo e relatórios -->
+            <div class="md:col-span-2 bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-2xl font-semibold mb-4 text-gray-900">Resumo</h2>
+                    <!-- ID do Usuário para identificação -->
+                    <div class="flex items-center space-x-4 mb-4">
+                        <span class="text-sm text-gray-500">ID do Usuário:</span>
+                        <span id="userIdDisplay" class="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded-md overflow-hidden whitespace-nowrap overflow-ellipsis">Carregando...</span>
+                    </div>
+                    <!-- Indicador de carregamento -->
+                    <div id="loadingIndicator" class="text-center text-gray-500 hidden">
+                        <div class="animate-pulse">Carregando dados...</div>
+                    </div>
+                    
+                    <div id="summaryPanel" class="space-y-4">
+                        <!-- Saldo Total -->
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl shadow-inner">
+                            <span class="text-lg font-medium text-gray-700">Saldo Total:</span>
+                            <span id="balanceDisplay" class="text-xl font-bold text-gray-900">R$ 0,00</span>
+                        </div>
+                        <!-- Receitas e Despesas -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="p-4 bg-green-50 rounded-xl">
+                                <span class="text-sm font-medium text-green-700">Receitas</span>
+                                <p id="incomeDisplay" class="text-2xl font-bold text-green-600 mt-1">R$ 0,00</p>
+                            </div>
+                            <div class="p-4 bg-red-50 rounded-xl">
+                                <span class="text-sm font-medium text-red-700">Despesas</span>
+                                <p id="expenseDisplay" class="text-2xl font-bold text-red-600 mt-1">R$ 0,00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Relatório por Categoria -->
+                <div class="mt-8">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-900">Relatório por Categoria</h3>
+                    <div id="categoryReport" class="space-y-2">
+                        <!-- Itens do relatório serão inseridos aqui dinamicamente -->
+                        <div class="text-gray-500 text-sm">Sem despesas registradas.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulário de Transação -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-900">Nova Transação</h2>
+                <form id="transactionForm" class="space-y-4">
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700">Descrição</label>
+                        <input type="text" id="description" placeholder="Ex: Conta de Luz" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border">
+                    </div>
+                    <div>
+                        <label for="amount" class="block text-sm font-medium text-gray-700">Valor (R$)</label>
+                        <input type="number" id="amount" placeholder="Ex: 150.00" step="0.01" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border">
+                    </div>
+                    <div>
+                        <label for="category" class="block text-sm font-medium text-gray-700">Categoria</label>
+                        <select id="category" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border">
+                            <option value="">Selecione a Categoria</option>
+                            <option value="Moradia">Moradia</option>
+                            <option value="Mercado">Mercado</option>
+                            <option value="Combustível">Combustível</option>
+                            <option value="Fatura de Cartão">Fatura de Cartão</option>
+                            <option value="Despesas Fixas">Despesas Fixas</option>
+                            <option value="Saúde">Saúde</option>
+                            <option value="Educação">Educação</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Tipo</label>
+                        <div class="mt-1 flex items-center space-x-4">
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="type" value="receita" required class="form-radio text-green-600">
+                                <span class="ml-2 text-green-700">Receita</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="type" value="despesa" required class="form-radio text-red-600">
+                                <span class="ml-2 text-red-700">Despesa</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit"
+                        class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                        Adicionar Transação
+                    </button>
+                </form>
+            </div>
+        </main>
+
+        <!-- Lista de Transações -->
+        <section class="mt-8 bg-white rounded-2xl shadow-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-900">Histórico de Transações</h2>
+            <div id="transactionsList" class="space-y-4">
+                <!-- Transações serão inseridas aqui dinamicamente -->
+            </div>
+        </section>
+
+        <!-- Modal para mensagens -->
+        <div id="messageModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4">
+            <div class="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full">
+                <p id="modalMessage" class="text-center font-medium text-gray-700 mb-4"></p>
+                <button id="closeModalBtn" class="w-full py-2 px-4 rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts do Firebase -->
+    <script type="module">
+        // Importa os módulos necessários do Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Variáveis globais de ambiente fornecidas pelo sistema
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db;
+        let auth;
+        let userId;
+
+        // Elementos da UI
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const summaryPanel = document.getElementById('summaryPanel');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const balanceDisplay = document.getElementById('balanceDisplay');
+        const incomeDisplay = document.getElementById('incomeDisplay');
+        const expenseDisplay = document.getElementById('expenseDisplay');
+        const categoryReport = document.getElementById('categoryReport');
+        const transactionForm = document.getElementById('transactionForm');
+        const transactionsList = document.getElementById('transactionsList');
+        const messageModal = document.getElementById('messageModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        // Função para mostrar o modal de mensagem
+        function showModal(message) {
+            modalMessage.textContent = message;
+            messageModal.classList.remove('hidden');
+            messageModal.classList.add('flex');
+        }
+
+        // Event listener para fechar o modal
+        closeModalBtn.addEventListener('click', () => {
+            messageModal.classList.add('hidden');
+            messageModal.classList.remove('flex');
+        });
+
+        // Formata o valor como moeda brasileira
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        };
+
+        // Função para renderizar as transações na lista
+        const renderTransactions = (transactions) => {
+            transactionsList.innerHTML = ''; // Limpa a lista antes de renderizar
+            if (transactions.length === 0) {
+                transactionsList.innerHTML = '<p class="text-center text-gray-500">Nenhuma transação registrada.</p>';
+                return;
+            }
+
+            // Ordena as transações por data (mais recente primeiro)
+            const sortedTransactions = transactions.sort((a, b) => b.timestamp - a.timestamp);
+
+            sortedTransactions.forEach(transaction => {
+                const item = document.createElement('div');
+                const isExpense = transaction.type === 'despesa';
+                const textColor = isExpense ? 'text-red-600' : 'text-green-600';
+                const sign = isExpense ? '-' : '+';
+                const amount = isExpense ? transaction.amount : transaction.amount;
+                const formattedDate = new Date(transaction.timestamp).toLocaleDateString('pt-BR');
+
+                item.className = `p-4 flex items-center justify-between border-b last:border-b-0 transition-colors hover:bg-gray-50 rounded-xl`;
+                
+                item.innerHTML = `
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-900">${transaction.description}</div>
+                        <div class="text-sm text-gray-500">${transaction.category} - ${formattedDate}</div>
+                    </div>
+                    <div class="font-semibold ${textColor} mr-4">
+                        ${sign} ${formatCurrency(amount)}
+                    </div>
+                    <button class="text-gray-400 hover:text-red-500 transition-colors" data-doc-id="${transaction.id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                `;
+                transactionsList.appendChild(item);
+
+                // Adiciona o event listener para o botão de exclusão
+                item.querySelector('button').addEventListener('click', async () => {
+                    const docId = item.querySelector('button').dataset.docId;
+                    try {
+                        await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/transactions`, docId));
+                    } catch (e) {
+                        console.error("Erro ao deletar documento: ", e);
+                        showModal("Erro ao deletar transação.");
+                    }
+                });
+            });
+        };
+
+        // Função para renderizar o resumo e relatórios
+        const renderSummary = (transactions) => {
+            let totalIncome = 0;
+            let totalExpenses = 0;
+            const categoryExpenses = {};
+
+            transactions.forEach(t => {
+                if (t.type === 'receita') {
+                    totalIncome += t.amount;
+                } else if (t.type === 'despesa') {
+                    totalExpenses += t.amount;
+                    if (categoryExpenses[t.category]) {
+                        categoryExpenses[t.category] += t.amount;
+                    } else {
+                        categoryExpenses[t.category] = t.amount;
+                    }
+                }
+            });
+
+            const balance = totalIncome - totalExpenses;
+            
+            // Atualiza os displays na UI
+            balanceDisplay.textContent = formatCurrency(balance);
+            incomeDisplay.textContent = formatCurrency(totalIncome);
+            expenseDisplay.textContent = formatCurrency(totalExpenses);
+
+            // Renderiza o relatório por categoria
+            categoryReport.innerHTML = ''; // Limpa antes de renderizar
+            const sortedCategories = Object.entries(categoryExpenses).sort(([, a], [, b]) => b - a);
+
+            if (sortedCategories.length === 0) {
+                categoryReport.innerHTML = '<p class="text-gray-500 text-sm">Sem despesas registradas.</p>';
+            } else {
+                sortedCategories.forEach(([category, amount]) => {
+                    const percentage = totalExpenses > 0 ? (amount / totalExpenses * 100).toFixed(1) : 0;
+                    const item = document.createElement('div');
+                    item.className = 'flex items-center justify-between p-2 bg-gray-50 rounded-lg';
+                    item.innerHTML = `
+                        <span class="text-sm font-medium text-gray-700">${category}</span>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm font-semibold text-gray-800">${formatCurrency(amount)}</span>
+                            <span class="text-xs text-gray-500">(${percentage}%)</span>
+                        </div>
+                    `;
+                    categoryReport.appendChild(item);
+                });
+            }
+        };
+
+        // Função principal para iniciar o aplicativo
+        const initApp = () => {
+            try {
+                // Inicializa o Firebase
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Oculta o resumo e mostra o indicador de carregamento
+                summaryPanel.classList.add('hidden');
+                loadingIndicator.classList.remove('hidden');
+
+                // Listener para o estado de autenticação do usuário
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        userIdDisplay.textContent = userId;
+                        console.log(`Usuário autenticado: ${userId}`);
+
+                        // Acesso à coleção de transações do usuário
+                        const transactionsCol = collection(db, `artifacts/${appId}/users/${userId}/transactions`);
+
+                        // Realiza a consulta em tempo real com onSnapshot
+                        onSnapshot(transactionsCol, (snapshot) => {
+                            const transactions = [];
+                            snapshot.forEach(doc => {
+                                transactions.push({ id: doc.id, ...doc.data() });
+                            });
+                            
+                            // Oculta o indicador e mostra o resumo
+                            loadingIndicator.classList.add('hidden');
+                            summaryPanel.classList.remove('hidden');
+
+                            // Renderiza os dados
+                            renderTransactions(transactions);
+                            renderSummary(transactions);
+                        }, (error) => {
+                            console.error("Erro ao obter transações: ", error);
+                            showModal("Erro ao carregar os dados financeiros.");
+                            loadingIndicator.classList.add('hidden');
+                        });
+                    } else {
+                        // Se não estiver autenticado, tenta o login anônimo ou com token
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch (error) {
+                            console.error("Erro na autenticação: ", error);
+                            showModal("Erro na autenticação. Tente novamente mais tarde.");
+                        }
+                    }
+                });
+
+                // Event listener para o formulário de transação
+                transactionForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    if (!userId) {
+                        showModal("Erro: Usuário não autenticado. Tente recarregar a página.");
+                        return;
+                    }
+                    
+                    const description = document.getElementById('description').value;
+                    const amount = parseFloat(document.getElementById('amount').value);
+                    const category = document.getElementById('category').value;
+                    const type = document.querySelector('input[name="type"]:checked').value;
+                    
+                    const newTransaction = {
+                        description,
+                        amount: amount,
+                        category,
+                        type,
+                        timestamp: Date.now()
+                    };
+                    
+                    try {
+                        await addDoc(collection(db, `artifacts/${appId}/users/${userId}/transactions`), newTransaction);
+                        // Limpa o formulário após o sucesso
+                        transactionForm.reset();
+                    } catch (e) {
+                        console.error("Erro ao adicionar documento: ", e);
+                        showModal("Erro ao salvar a transação.");
+                    }
+                });
+
+            } catch (error) {
+                console.error("Erro de inicialização: ", error);
+                showModal("Erro ao inicializar o aplicativo. Verifique a configuração.");
+            }
+        };
+
+        // Inicia o aplicativo quando a janela estiver carregada
+        window.onload = initApp;
+
+    </script>
+</body>
+</html>
