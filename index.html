@@ -160,11 +160,26 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Variáveis globais de ambiente fornecidas pelo sistema
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // =======================================================
+        // SUA CONFIGURAÇÃO DO FIREBASE:
+        // Substitua os valores abaixo com as suas próprias chaves do Firebase.
+        // =======================================================
+        const YOUR_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyBC4zPHxVmUpNxiV8q19p1tx30IXn6H5hE",
+            authDomain: "financas-pessoais-681c9.firebaseapp.com",
+            projectId: "financas-pessoais-681c9",
+            storageBucket: "financas-pessoais-681c9.firebasestorage.app",
+            messagingSenderId: "673601110518",
+            appId: "1:673601110518:web:92e500155ddaff05f4c7d7",
+            measurementId: "G-P1J7YLBM58"
+        };
+        // =======================================================
 
+        // Variáveis globais de ambiente fornecidas pelo sistema (para funcionar no Canvas)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'finance_tracker_app';
+        const firebaseConfigFromCanvas = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? initialAuthToken : null;
+        
         let db;
         let auth;
         let userId;
@@ -306,6 +321,15 @@
         // Função principal para iniciar o aplicativo
         const initApp = () => {
             try {
+                // Usa a configuração do Canvas se estiver disponível, ou a do usuário
+                const firebaseConfig = firebaseConfigFromCanvas || YOUR_FIREBASE_CONFIG;
+                
+                if (!firebaseConfig || !firebaseConfig.projectId || firebaseConfig.projectId === "YOUR_PROJECT_ID") {
+                    showModal("Erro: As credenciais do Firebase não foram configuradas. Por favor, siga as instruções abaixo para adicionar sua configuração.");
+                    loadingIndicator.classList.add('hidden');
+                    return;
+                }
+                
                 // Inicializa o Firebase
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
